@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="msapplication-tap-highlight" content="no" />
+    <script>
+        document.documentElement.style.fontSize = Math.max(window.innerWidth, window.innerHeight)/10.8 + 'px';
+    </script>
+<style>
+*{
+    box-sizing: border-box;
+}
+body,html,ul,li,p,dl,dt,dd,h1,h2,h3,h4,h5{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 400;
+    font-style: normal;
+}
+html{
+    font-family: Microsoft Yahei;
+    margin: auto;
+} 
+img,input{
+    outline: none;
+}
+a{
+    text-decoration: none;
+    outline: none;
+}
+div,ul,li,form,input,span,b,a,i,em{
+    -webkit-tap-highlight-color: transparent;
+    font-style: normal;
+    font-weight: normal;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+.wrapper{
+	max-width: 1080px;
+	margin: 0 auto;
+	padding: .2rem .3rem .3rem;
+}
+	.tit{
+		font-size: .4rem;
+		text-align: center;
+		line-height: 1rem;
+		padding-top: .1rem;
+	}
+	ul{
+		/*padding: 0 .3rem .3rem;*/
+	}
+	ul li{
+		width: 100%;
+		height: auto;
+/*		float: left;*/
+	}
+	ul p{
+		font-size: .24rem;
+		text-align: center;
+		height: .5rem;
+		line-height: .5rem;
+		margin-bottom: .1rem;
+	}
+	ul div{
+/*		background-image: url(img/gif/1.gif);
+		background-repeat: no-repeat;*/
+		width: 100%;
+		height: auto;
+	}
+	ul div img{
+		width: 100%;
+		display: block;
+	}
+	.nav{
+		width: 100%;
+		height: .5rem;
+		background-color: #cdcdcd;
+		border-radius: .1rem;
+		margin-bottom: .3rem;
+	}
+	.nav a{
+		width: 50%;
+		line-height: .5rem;
+		font-size: .2rem;
+		text-align: center;
+		display: inline-block;
+		float: left;
+		color: #fff;
+	}
+	.nav a.sel{
+		background-color: #ff7800;
+		border-radius: .1rem;
+	}
+	.div-sx {
+		display: none;
+	}
+
+</style>
+</head>
+<body >
+	<div class="wrapper">
+		<div class="nav">
+			<a href="javascript:void(0);" class="tab tab1 sel">手势控制交互示意图</a>
+			<a href="javascript:void(0);" class="tab tab2">手写模式交互示意图</a>
+		</div>
+		<div class="div-ss div-box">
+			<ul>
+				<li>
+					<div><img src="img/0.gif"></div>
+					<p>视频快退</p>
+				</li>
+				<li>
+					<div><img src="img/1.gif"></div>
+					<p>回到主页</p>
+				</li>
+				<li>
+					<div><img src="img/2.gif"></div>
+					<p>进入手写</p>
+				</li>
+				<li>
+					<div><img src="img/3.gif"></div>
+					<p>视频快进</p>
+				</li>
+				<li>
+					<div><img src="img/4.gif"></div>
+					<p>播放视频</p>
+				</li>
+				<li>
+					<div><img src="img/5.gif"></div>
+					<p>进入视频</p>
+				</li>
+				<li>
+					<div><img src="img/6.gif"></div>
+					<p>视频暂停</p>
+				</li>
+				<li>
+					<div><img src="img/7.gif"></div>
+					<p>音量减小</p>
+				</li>
+				<li>
+					<div><img src="img/8.gif"></div>
+					<p>音量增大</p>
+				</li>
+			</ul>
+		</div>
+		<div class="div-sx div-box">
+			<ul>
+				<li>
+					<div><img src="img/0.png"></div>
+					<p>系统初始化/文字确认上屏</p>
+				</li>
+				<li>
+					<div><img src="img/1.png"></div>
+					<p>手写示意图</p>
+				</li>
+				<li>
+					<div><img src="img/2.png"></div>
+					<p>删除文字</p>
+				</li>
+				<li>
+					<div><img src="img/3.png"></div>
+					<p>选择候选字</p>
+				</li>
+				<li>
+					<div><img src="img/4.png"></div>
+					<p>结束手写</p>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<script src="jquery.js"></script>
+	<script>
+		$('.tab').on('click', function () {
+			
+			var $this = $(this);
+			$('.tab').removeClass('sel');
+			$('.div-box').hide();
+			$this.addClass('sel');
+
+			if ($this.hasClass('tab1')) {
+				$('.div-ss').show();
+			}else{
+				$('.div-sx').show();
+			}
+		});
+	</script>
+</body>
+</html>

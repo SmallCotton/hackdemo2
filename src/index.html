@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <script>
+        document.documentElement.style.fontSize = Math.max(window.innerWidth, window.innerHeight)/28.8 + 'px';
+        // document.documentElement.style.fontSize = Math.max(window.innerWidth, window.innerHeight)/10 + 'px';
+
+    </script>
+</head>
+<body class="">
+<div class="home"></div>	
+<div class="write-box" id="writeBox">
+	<input type="text" class="text" id="input" value="" placeholder="请输入您想说的话">
+	<ul class="word-list" id="wordslist"></ul>
+	<div id="canvasBox" class="canvasBox"></div>
+</div>	
+<div class="state zt" id="state"></div>
+<canvas id="canvasBarrage" class="canvasBarrage"></canvas>
+<div class="video-box" id="videoBox">
+	<video id="videoBarrage" loop="true" width="100%" height="auto" src="img/v/0.mp4"></video>
+	<!-- controls -->
+	<div class="control-box">
+		<div class="hr">
+			<div class="selhr" id="selhr">
+				<span class="ro"></span>
+			</div>
+		</div>
+		<div class="i-box i-box1 fl">
+			<i class="i i0" id="playBtn"></i>
+			<i class="i i1"></i>
+			<i class="i i2"></i>
+			<span class="span1"><em class="em1" id="nowtime">00:00</em><em class="em2" id="alltime">&nbsp;/&nbsp;00:00</em></span>
+		</div>
+		<div class="i-box i-box2 fr">
+			<span class="sp" id="dmBtn">弹幕</span>
+			<span class="sp">高清</span>
+			<span class="sp">倍速</span>
+			<i class="i i3"></i>
+			<i class="i i4"></i>
+			<i class="i i5"></i>
+			<i class="i i6"></i>
+		</div>
+		<div class="volume-box" id="vhr">
+			<div class="vhr">
+				<div class="selvhr" id="selvhr">
+					<span class="ro"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="js/jquery.js"></script>
+<script src="js/barrage.js"></script>
+<script src='js/data.js'></script>
+<script>
+	var eleCanvas = document.getElementById('canvasBarrage');
+	var eleVideo = document.getElementById('videoBarrage');
+		eleVideo.volume = .5;
+
+	var demoBarrage = new CanvasBarrage(eleCanvas, eleVideo, {
+	    data: window.dataBarrage
+	});
+		// 或者字号大小
+	demoBarrage.fontSize = 1.5*(Math.max(window.innerWidth, window.innerHeight)/28.8);
+
+	// 新增弹幕
+	/* 
+	demoBarrage.add({
+	    value: '弹幕内容',
+	    time: eleVideo.currentTime
+	    // 其它如color, fontSize, opacity等可选
+	});
+	*/
+
+	// 全局设置修改，直接（例如）：
+	// demoBarrage.opacity = 50;
+	// 或者字号大小 demoBarrage.fontSize = 16;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~视频控件时时更新~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~～～
+	var $alltime = $('#alltime');
+	var $nowtime = $('#nowtime');
+	var $selhr = $('#selhr');
+	var $selvhr = $('#selvhr');
+	var $dmBtn = $('#dmBtn');
+	var $playBtn = $('#playBtn');
+	var $writeBox = $('#writeBox');
+	var $vhr = $('#vhr');
+	var state = document.getElementById('state');
+	var $state = $('#state');
+	var timeText = function(t){
+		var t = parseInt(t);
+		var s = t%60;
+		var m = (t-s)/60;
+		return (m<10?('0'+m):m) + ':' + (s<10?('0'+s):s)
+	};
+
+	eleVideo.addEventListener('timeupdate', function(){
+		$nowtime.html(timeText(eleVideo.currentTime));
+		var w = eleVideo.currentTime*100/parseInt(eleVideo.duration);
+		$selhr.css('width', w+'%');
+	});
+	eleVideo.addEventListener('loadedmetadata', function(){
+		$alltime.html('&nbsp;/&nbsp;'+timeText(eleVideo.duration));
+	});
+	var voiceshow = false;
+	var timelock = true;
+
+	var volumechangeLock = true;
+	eleVideo.addEventListener('volumechange', function(){
+		if (volumechangeLock) {
+			volumechangeLock = false;
+			return false;
+		}
+		$vhr.show();
+		setTimeout(function(){
+			var w = eleVideo.volume*100;
+			$selvhr.css({
+				'height': w+'%',
+				'-webkit-transition': 'all 1s'
+			});
+			$vhr.delay(3000).hide(0);
+		},500);
+
+
+		
+
+		// voiceshow = true;
+		// if (timelock) {
+		// 	timelock = false;
+	 //        setTimeout(function(){
+	 //        	//console.log(voiceshow, 'voiceshow')
+	 //            //if (!voiceshow) {
+	 //                $vhr.hide();
+	 //                //voiceshow = false;
+	 //            //}
+	 //           timelock = true;
+	 //        },3000);
+  //       }
+
+		// console.log(voiceshow,'voiceshow', timelock, 'timelock');
+
+  //       if (timelock) {
+  //           timelock = false;
+  //           setTimeout(function(){
+  //               if (!voiceshow) {
+  //                   $vhr.hide();
+  //                   voiceshow = false;
+  //               }
+  //               timelock = true;
+  //           },1000);
+  //       }
+ 
+	});
+
+	function iconShow(c, show){
+		state.className = 'state '+c;
+		$state.show();
+		if (!show) {
+			$state.delay(1000).fadeOut(500);
+		}
+	}
+
+	var VT = function(){
+		var vt = {};
+		vt.dm = function(show){
+			if (show) {
+	    		$writeBox.css('visibility','visible');
+	    		$dmBtn.addClass('sel');
+			}else{
+	    		$writeBox.css('visibility','hidden');
+	    		$dmBtn.removeClass('sel');
+			}
+		}
+		vt.play = function(play){
+			if (play) {
+				eleVideo.play();
+	    		$playBtn.addClass('sel');
+			}else{
+				eleVideo.pause();
+	    		$playBtn.removeClass('sel');
+			}
+		}
+
+		return vt;
+	}();
+	// ~~~~~~~~~~~~~~~~~~~~~~~~canvas手写字体~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		var cycleGestureLock = true;
+		var cycleWriteLock = false;
+
+		var body = document.body;
+		var canvasBox = document.getElementById('canvasBox');
+		var callname = '';
+		var allword = [];
+		var selwordNum = 0;
+
+		var selectFirst = 0;
+
+ 		var $input = $('#input');
+ 		var $wordslist = $('#wordslist');
+
+	    var canvas = document.createElement("canvas");
+	    	canvasBox.appendChild(canvas);
+
+	    var gbcr = canvasBox.getBoundingClientRect();
+
+	    var signal = true;
+	    var cxt = canvas.getContext("2d");
+		    canvas.width = canvasBox.clientWidth;
+		    canvas.height = canvasBox.clientHeight;
+		    cxt.fillRect(gbcr['left'], gbcr['top'], canvas.width, canvas.width);
+		    cxt.strokeStyle = '#FFFFFF';
+		    cxt.lineWidth = 3;
+		    cxt.lineCap = "round";
+
+		//console.log(canvas.width, canvas.height, 'height')
+
+		var mod = function(res){
+			var m = {};
+			m.initWrite = function(){
+				callname = '';
+				$wordslist.html('');
+				$input.val('');
+			};
+			m.initVideo = function(){
+				VT.dm();
+	    		//$('#writeBox').css('visibility','hidden');
+
+	    		body.className = '';
+
+	    		mod.initWrite();
+					
+				var cycleGestureLock = true;
+				var cycleWriteLock = false;
+
+					// eleVideo.pause();
+					VT.play();
+					eleVideo.currentTime=0;
+					eleVideo.volume = 0;
+				$.get('http://10.134.11.159/clear?target=move', function(res){});
+				$.get('http://10.134.11.159/clear?target=char', function(res){});
+				cycleGesture();
+			};
+			m.resetVideo = function(){
+				//$('#writeBox').css('visibility','hidden');
+				VT.dm();
+
+				// eleVideo.pause();
+				VT.play();
+				eleVideo.currentTime=0;
+				eleVideo.volume = 0;
+			};
+			m.renderlist = function(res){
+
+				var arr0 = res.split('!');
+		    	var arr1 = (arr0[1]&&arr0[1].split(',')) || [];
+		    	arr1.unshift(arr0[0]);
+		    	var tpl = '';
+		    	for(var i=0; i<arr1.length; i++){
+		    		if (arr1[i]) {
+		    			tpl+='<li '+ (i==0?'class="sel"':'') +'><em>'+arr1[i]+'</em></li>'
+		    		}
+		    	}
+		    	$wordslist.html(tpl);
+		    	allword = arr1;
+
+			};
+			return m;
+		}();
+
+		var cycleWrite = function(){
+
+			$.get('http://10.134.11.159/write', function(res){
+
+				console.log('cycleWrite', res);
+
+		    	 if(/-?\d+\,-?\d+/.test(res)){
+
+	                var arr = res.split(',');
+	                var rate = canvasBox.clientWidth/320;
+	                var xoffset = 0;
+	                var yoffset = 0;
+
+	                var x0 = parseInt(arr[0]);
+	                var y0 = parseInt(arr[1]);
+	                var x = parseInt(arr[0])*rate+xoffset;
+	                var y = parseInt(arr[1])*rate+yoffset;
+
+	                if (x0>-1&&y0>-1) {
+	                    if (signal) {
+	                    	//console.log('begin write')
+	                        cxt.beginPath();
+	                        cxt.moveTo(x, y);
+	                       // console.log(x,y,'@@@@1')
+	                    }else{
+	                        cxt.lineTo(x, y);
+	                        cxt.stroke();
+	                        //console.log(x,y,'@@@@2')
+	                    }
+	                    signal = false;
+	                }else if(x0==-1&&y0==-1){
+	                   // console.log('end write')
+
+	                    cxt.closePath();
+	                    signal = true;
+	                    //console.log(x,y,'@@@@3')
+	                }
+
+		    		selectFirst = 0;
+
+		    	}else if(res.indexOf('!')>-1){
+
+		    		mod.renderlist(res);
+		    		setTimeout(function(){
+		    			cxt.clearRect(0, 0, canvas.width, canvas.width);
+		    		}, 30);
+
+		    		selectFirst = 0;
+
+		    	}else if(res=='delete'){
+	 
+		    		if (callname.length>0) {
+		    			callname = $input.val();
+	    				callname = callname.substring(0, callname.length-1);
+			    		$input.val(callname);
+			    		$wordslist.html('');
+		    		}
+		    		selectFirst = 0;
+
+		    	}else if(res=='select'){
+
+		    		console.log(selectFirst, 'selectFirst');
+		    		if(selectFirst>1){
+		    			//if (selectFirst >1) {
+
+				    		var lis = $('#wordslist').find('li');
+				    		var len = lis.length;
+				    		var si = $('#wordslist').find('li.sel').index();
+
+				    		si = si+1;
+
+				    		if (si==len) {
+				    			si=0;
+				    		}
+
+			    			lis.removeClass('sel');
+			    			lis.eq(si).addClass('sel');
+			    			selwordNum = si;
+
+			    			console.log(si, 'si', 'selwordNum');
+						//}
+						//selectFirst = selectFirst + 1;
+			    		
+			    		//console.log(si, 'si', selectFirst, 'selectFirst');
+
+					}
+
+					selectFirst = selectFirst + 1;
+
+		    	}else if(res=='screen'){
+		    		if (selwordNum>0) {
+		    			selwordNum = selwordNum-1;
+		    		}
+		    		if (allword[selwordNum]) {
+		    			callname += allword[selwordNum];
+		    			$input.val(callname);
+		    		}
+
+		    		$wordslist.html('');
+		    		allword = [];
+		    		selwordNum = 0;
+
+		    		selectFirst = 0;
+
+		    	}else if(res == 'ok'){
+
+					demoBarrage.add({
+						color: 'yellow',
+					    value: callname,
+					    time: eleVideo.currentTime,
+					    // speed: 0
+					});
+
+					//$('#writeBox').hide();
+		    		//$('#writeBox').css('visibility','hidden');
+					VT.dm();
+
+		    		mod.initWrite();
+ 					
+					cycleWriteLock = false;
+		    		cycleGestureLock = true;
+
+		    		cycleGesture();
+					$.get('http://10.134.11.159/clear?target=move', function(res){
+						//console.log(res);
+					});
+
+		    		selectFirst = 0;
+
+		    	}
+
+				if(cycleWriteLock&& !cycleGestureLock) {
+					setTimeout(cycleWrite, 10);
+				}
+
+			});
+
+		};
+
+		var cycleGesture = function(){
+
+			$.get('http://10.134.11.159/move', function(res){
+				
+				console.log('cycleGesture', res);
+
+				if (res=='ok') {
+					VT.play(true);
+					iconShow('bf');
+				}else if(res=='stop') {
+	    			// eleVideo.pause();
+	    			VT.play();
+					iconShow('zt', true);
+
+				}else if(res=='right') {
+	    			eleVideo.currentTime = Math.min(eleVideo.currentTime + eleVideo.duration/10, eleVideo.duration);
+					iconShow('kj');
+
+				}else if(res=='left') {
+	    			eleVideo.currentTime = Math.max(eleVideo.currentTime - eleVideo.duration/10, 0);
+					iconShow('kt');
+
+
+				}else if(res=='up') {
+	    			eleVideo.volume = Math.min((eleVideo.volume*10 + 4)/10, 1);
+				}else if (res=='down'){
+	    			eleVideo.volume = Math.max((eleVideo.volume*10 - 4)/10, 0);
+				}else if(res=='no'){
+	    			body.className = 'homeshow';
+	    			mod.resetVideo();
+
+				}else if (res=='wake_up' && body.className!='homeshow') {
+ 
+		    		cxt.clearRect(0, 0, canvas.width, canvas.width);
+		    		mod.initWrite();
+		    		signal = true;
+
+		    		//$('#writeBox').css('visibility','visible');
+					VT.dm(true);
+
+		    		cycleWriteLock = true;
+		    		cycleGestureLock = false;
+
+		    		cycleWrite();
+					$.get('http://10.134.11.159/clear?target=char', function(res){
+						//console.log(res);
+					});
+
+				}else if(res == 'send'){
+					if (body.className=='homeshow') {
+						mod.initVideo();
+					}
+		    	}
+
+				if(!cycleWriteLock&&cycleGestureLock) {
+					setTimeout(cycleGesture, 10);
+				}
+				
+			});
+		};
+
+		cycleGesture();
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	window.onkeydown = function(e){
+		// ok. stop ri lt up down 
+		if(e.keyCode==65){ //a 播放
+			VT.play(true);
+			iconShow('bf');
+		}
+
+	    if(e.keyCode==66){ //b 暂停
+	    	VT.play();
+			iconShow('zt', true);
+    	}
+
+	    if(e.keyCode==67){ //c 快进
+	    	eleVideo.currentTime = Math.min(eleVideo.currentTime + eleVideo.duration/10, eleVideo.duration);
+			iconShow('kj');
+    	}
+
+	    if(e.keyCode==68){ //d 快退
+	    	eleVideo.currentTime = Math.max(eleVideo.currentTime - eleVideo.duration/10, 0);
+			iconShow('kt');
+    	}
+
+	    if(e.keyCode==69){ //e 音量大
+	    	eleVideo.volume = Math.min((eleVideo.volume*10 + 4)/10, 1);
+	    	console.log(eleVideo.volume)
+    	}
+
+	    if(e.keyCode==70){ //f 音量小
+	    	eleVideo.volume = Math.max((eleVideo.volume*10 - 4)/10, 0);
+	    	console.log(eleVideo.volume)
+
+    	}
+
+	    if(e.keyCode==71){ //g 主页
+	    	body.className='homeshow';
+	    	initVideo();
+    	}
+
+	    if(e.keyCode==72){ //H 
+			demoBarrage.add({
+				color: 'yellow',
+			    value: 'DASKADSLADA',
+			    time: eleVideo.currentTime,
+			    // speed: 0
+			});
+    	}
+
+	    if(e.keyCode==73){ //i
+			cycleWrite()
+		    //mod.renderlist('中!地,空,集,就,集,的,积');
+		    //$('#writeBox').css('visibility','visible');
+			VT.dm(true);
+
+    	}
+
+    };
+
+
+</script>
+</body>
+</html>

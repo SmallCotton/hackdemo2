@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <link rel="stylesheet" type="text/css" href="css/demo.css">
+    <script>
+        document.documentElement.style.fontSize = Math.max(window.innerWidth, window.innerHeight)/19.2 + 'px';
+    </script>
+    <style>
+    .write-box .canvas{
+    	width: 6.08rem;
+    	right: .61rem;
+    	/*margin: 0 auto;*/
+    }
+    </style>
+</head>
+<body class="startup"> 
+	<!-- startup  -->
+	<div class="pg2 page">
+		<div class="div2 sec">
+			<div class="call-bg call-bg3">
+ 				<span class="name" id="name"></span>
+ 			</div>
+			<div class="write-box">
+				<div class="div1">
+					<div class="text-box">
+						<div class="words" id="words"></div>
+						<!-- <a href="javascript:void(0);" class="ico del del4"></a>  -->
+					</div>
+<!-- 					<div class="input" id="input">
+						<span class="holder"><i class="ico"></i>请输入联系人</span>
+					</div>
+					<div class="words-box">
+						<ul class="words-list" id="wordslist">
+						</ul>
+					</div> -->
+				</div>
+				<!-- <ul class="chose-list" id="choseList"></ul> -->
+				<div class="div2">
+					<i></i>
+				</div>
+				<div id="canvasBox" class="canvas"></div>
+				<i class="ico putword"></i>
+			</div>
+		</div>
+	</div>
+
+<script src="js/jquery.js"></script>
+<script>
+	$(function () {
+
+		var body = document.body;
+		var canvasBox = document.getElementById('canvasBox');
+		var callname = '';
+ 		var $choseList = $('#choseList');
+ 		var $words = $('#words');
+
+	    var canvas = document.createElement("canvas");
+	    	canvasBox.appendChild(canvas);
+
+	    var gbcr = canvasBox.getBoundingClientRect();
+
+	    var signal = true;
+	    var cxt = canvas.getContext("2d");
+		    canvas.width = canvasBox.clientWidth;
+		    canvas.height = canvasBox.clientHeight;
+	    	//cxt.fillStyle = this.background;
+		    cxt.fillRect(gbcr['left'], gbcr['top'], canvas.width, canvas.height);
+		    cxt.strokeStyle = '#ca3e63';
+		    cxt.lineWidth = 3;
+		    cxt.lineCap = "round";
+
+		var cycle = function(cb){
+
+			$.get('http://10.134.11.159/write', function(res){
+
+				if(/-?\d+\,-?\d+/.test(res)){
+
+	                var arr = res.split(',');
+	                var rate = canvasBox.clientWidth/320;
+	                var xoffset = 0;
+	                var yoffset = 0;
+
+	                var x0 = parseInt(arr[0]);
+	                var y0 = parseInt(arr[1]);
+	                var x = parseInt(arr[0])*rate+xoffset;
+	                var y = parseInt(arr[1])*rate+yoffset;
+
+	                if (x0>-1&&y0>-1) {
+	                    if (signal) {
+	                        cxt.beginPath();
+	                        cxt.moveTo(x, y);
+	                        console.log(x,y,'@@@@1')
+	                    }else{
+	                        cxt.lineTo(x, y);
+	                        cxt.stroke();
+	                        console.log(x,y,'@@@@2')
+
+	                    }
+	                    signal = false;
+	                }else if(x0==-1&&y0==-1){
+	                    cxt.closePath();
+	                    signal = true;
+	                    console.log(x,y,'@@@@3')
+	                }
+
+				}else if(res.indexOf('!')>-1){
+		    		var arr = res.split('!');
+		    		var w0 = arr[0];
+
+		    		callname += w0;
+		    		$words.html(callname);
+
+		    		$('.putword').addClass('add');
+
+		    		setTimeout(function(){
+		    			cxt.clearRect(0, 0, canvas.width, canvas.height);
+		    		}, 30); 
+
+		    	}
+
+				setTimeout(cycle, 10);
+
+			});
+
+		};
+
+		cycle();
+
+	});
+</script> 
+</body>
+</html>
